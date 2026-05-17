@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MBTI 人格测试</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#07C160;--primary-dark:#06AD56;--primary-light:#E8F8EE;--bg:#F5F5F5;--card-bg:#FFFFFF;--text-primary:#1A1A1A;--text-secondary:#666666;--text-light:#999999;--border:#EFEFEF;--shadow:0 2px 12px rgba(0,0,0,0.08);--radius:16px;--radius-sm:10px;--danger:#E74C3C;--progress-bg:#E8E8E8}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text-primary);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.page{display:none;min-height:100vh;padding:20px}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+#homePage.active{display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#07C160 0%,#06AD56 50%,#059B4B 100%);padding:40px 30px;text-align:center}
+.home-icon{width:100px;height:100px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;margin-bottom:30px;animation:pulse 2s infinite}
+.home-title{font-size:32px;font-weight:700;color:#FFF;margin-bottom:12px;letter-spacing:2px}
+.home-subtitle{font-size:16px;color:rgba(255,255,255,0.85);margin-bottom:40px;line-height:1.8}
+.home-features{display:flex;flex-direction:column;gap:12px;margin-bottom:40px;width:100%;max-width:320px}
+.feature-item{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,0.9);font-size:14px}
+.feature-item .check{width:22px;height:22px;background:rgba(255,255,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.btn-start{width:100%;max-width:300px;padding:16px 0;background:#FFF;color:var(--primary);border:none;border-radius:50px;font-size:18px;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.15);-webkit-tap-highlight-color:transparent}
+.btn-start:active{transform:scale(0.97)}
+.home-note{margin-top:20px;font-size:12px;color:rgba(255,255,255,0.6)}
+.test-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding:0 4px}
+.test-header .back-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--text-secondary);padding:4px 8px;-webkit-tap-highlight-color:transparent}
+.test-header .progress-text{font-size:14px;color:var(--text-secondary);font-weight:500}
+.progress-bar-container{width:100%;height:6px;background:var(--progress-bg);border-radius:3px;margin-bottom:30px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),#07E070);border-radius:3px;transition:width .5s ease;width:0%}
+.question-card{background:var(--card-bg);border-radius:var(--radius);padding:30px 24px;box-shadow:var(--shadow)}
+.question-number{display:inline-block;background:var(--primary-light);color:var(--primary);font-size:13px;font-weight:600;padding:4px 14px;border-radius:20px;margin-bottom:16px}
+.question-text{font-size:18px;font-weight:500;line-height:1.7;margin-bottom:30px;color:var(--text-primary)}
+.options{display:flex;flex-direction:column;gap:10px}
+.option-item{padding:14px 18px;border:2px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:15px;color:var(--text-secondary);text-align:center;background:var(--card-bg);-webkit-tap-highlight-color:transparent;user-select:none;transition:all .2s ease}
+.option-item:active{transform:scale(0.97)}
+.option-item.selected{border-color:var(--primary);background:var(--primary-light);color:var(--primary);font-weight:500}
+#resultPage{padding:30px 20px}
+.result-header{text-align:center;margin-bottom:30px}
+.result-type{font-size:56px;font-weight:800;color:var(--primary);letter-spacing:6px;margin-bottom:8px}
+.result-name{font-size:20px;color:var(--text-primary);font-weight:600;margin-bottom:6px}
+.result-nickname{font-size:14px;color:var(--text-light);margin-bottom:20px}
+.result-description{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px}
+.result-description h3{font-size:14px;color:var(--text-light);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.result-description p{font-size:15px;color:var(--text-secondary);line-height:1.8}
+.dimension-section{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px}
+.dimension-section h3{font-size:14px;color:var(--text-light);margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+.dimension-item{margin-bottom:16px}
+.dimension-item:last-child{margin-bottom:0}
+.dim-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.dim-label .left{font-size:13px;font-weight:600;color:var(--text-primary)}
+.dim-label .right{font-size:13px;color:var(--text-light)}
+.dim-label .score{font-size:12px;color:var(--text-secondary)}
+.dim-bar{height:8px;background:var(--progress-bg);border-radius:4px;overflow:hidden}
+.dim-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),#07E070);border-radius:4px;transition:width 1s ease}
+.dim-indicator{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--text-light)}
+.traits-section{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px}
+.traits-section h3{font-size:14px;color:var(--text-light);margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
+.traits-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.traits-column .trait-label{font-size:12px;color:var(--text-light);margin-bottom:8px;font-weight:500}
+.trait-tags{display:flex;flex-wrap:wrap;gap:6px}
+.trait-tag{padding:5px 12px;border-radius:15px;font-size:12px;font-weight:500}
+.trait-tag.positive{background:var(--primary-light);color:var(--primary)}
+.trait-tag.negative{background:#FFF0F0;color:var(--danger)}
+.careers-section{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px}
+.careers-section h3{font-size:14px;color:var(--text-light);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.career-tags{display:flex;flex-wrap:wrap;gap:8px}
+.career-tag{padding:6px 16px;background:#F0F0F0;border-radius:15px;font-size:13px;color:var(--text-secondary)}
+.celebrities-section{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:20px}
+.celebrities-section h3{font-size:14px;color:var(--text-light);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+.celeb-list{display:flex;flex-wrap:wrap;gap:8px}
+.celeb-item{padding:6px 16px;background:#FFF8E0;border-radius:15px;font-size:13px;color:#B8860B}
+.result-actions{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.btn-restart{width:100%;padding:14px 0;background:var(--primary);color:#FFF;border:none;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btn-restart:active{transform:scale(0.97)}
+.btn-share{width:100%;padding:14px 0;background:var(--card-bg);color:var(--text-secondary);border:2px solid var(--border);border-radius:50px;font-size:16px;font-weight:500;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.btn-share:active{transform:scale(0.97);border-color:var(--primary);color:var(--primary)}
+.toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(0,0,0,0.75);color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;opacity:0;transition:all .3s ease;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(min-width:480px){#homePage,#testPage,#resultPage{max-width:480px;margin:0 auto}}
+@media(max-width:360px){.question-text{font-size:16px}.option-item{font-size:14px;padding:12px 14px}.result-type{font-size:44px}}
+</style>
+</head>
+<body>
+
+<div id="homePage" class="page active">
+  <div class="home-icon">🧠</div>
+  <h1 class="home-title">MBTI 人格测试</h1>
+  <p class="home-subtitle">93 道精选题目 · 15 分钟完成<br>发现你的性格密码</p>
+  <div class="home-features">
+    <div class="feature-item"><span class="check">✓</span><span>专业题库，覆盖四大维度</span></div>
+    <div class="feature-item"><span class="check">✓</span><span>详细结果，16种人格解析</span></div>
+    <div class="feature-item"><span class="check">✓</span><span>无需注册，即开即测</span></div>
+    <div class="feature-item"><span class="check">✓</span><span>数据仅保存在本地</span></div>
+  </div>
+  <button class="btn-start" onclick="startTest()">开始测试</button>
+  <p class="home-note">测试结果仅供娱乐参考</p>
+</div>
+
+<div id="testPage" class="page">
+  <div class="test-header">
+    <button class="back-btn" onclick="prevQuestion()">‹</button>
+    <span class="progress-text" id="progressText">0 / 93</span>
+  </div>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div id="questionContainer"></div>
+</div>
+
+<div id="resultPage" class="page">
+  <div class="result-header">
+    <div class="result-type" id="resultType">INTJ</div>
+    <div class="result-name" id="resultName">建筑师型人格</div>
+    <div class="result-nickname" id="resultNickname">「策略家」</div>
+  </div>
+  <div class="result-description"><h3>类型概述</h3><p id="resultSummary"></p></div>
+  <div class="result-description"><h3>详细解读</h3><p id="resultDetail"></p></div>
+  <div class="dimension-section"><h3>维度分析</h3><div id="dimensionBars"></div></div>
+  <div class="traits-section">
+    <h3>性格特质</h3>
+    <div class="traits-grid">
+      <div class="traits-column"><div class="trait-label">✨ 优势</div><div class="trait-tags" id="strengths"></div></div>
+      <div class="traits-column"><div class="trait-label">⚠️ 弱势</div><div class="trait-tags" id="weaknesses"></div></div>
+    </div>
+  </div>
+  <div class="careers-section"><h3>适合职业</h3><div class="career-tags" id="careerTags"></div></div>
+  <div class="celebrities-section"><h3>代表人物</h3><div class="celeb-list" id="celebList"></div></div>
+  <div class="result-actions">
+    <button class="btn-restart" onclick="restartTest()">重新测试</button>
+    <button class="btn-share" onclick="shareResult()">📤 分享结果</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+var questions=[
+{id:1,text:'在聚会上，我很乐意主动与陌生人交谈。',d:'ei',r:1},{id:2,text:'在团队讨论中，我经常是发言较多的人。',d:'ei',r:1},{id:3,text:'与他人互动让我感到精力充沛。',d:'ei',r:1},{id:4,text:'我更喜欢通过交谈来理清自己的想法。',d:'ei',r:1},{id:5,text:'我认识很多人，并且乐于维持广泛的社交圈。',d:'ei',r:1},{id:6,text:'空闲时，我倾向于约朋友一起活动而不是独自待着。',d:'ei',r:1},{id:7,text:'在社交场合中我通常很放松，而不是感到拘谨。',d:'ei',r:1},{id:8,text:'我经常是那个主动发起对话的人。',d:'ei',r:1},{id:9,text:'我喜欢在人群中工作，这让我更有干劲。',d:'ei',r:1},{id:10,text:'与人见面时，我会主动开启话题。',d:'ei',r:1},{id:11,text:'我更喜欢参加热闹的聚会而非小范围安静聊天。',d:'ei',r:1},{id:12,text:'课堂或会议上，我经常举手发言。',d:'ei',r:1},{id:13,text:'长时间社交后，我需要独处来恢复精力。',d:'ei',r:-1},{id:14,text:'在开口之前，我习惯先仔细思考。',d:'ei',r:-1},{id:15,text:'我更享受与一两位朋友深度交流，而不是一大群人。',d:'ei',r:-1},{id:16,text:'别人有时会觉得我很安静或难以了解。',d:'ei',r:-1},{id:17,text:'我倾向于避免成为众人关注的焦点。',d:'ei',r:-1},{id:18,text:'对我来说，独处的时间是非常重要的。',d:'ei',r:-1},{id:19,text:'在大型社交场合中，我经常感到不自在。',d:'ei',r:-1},{id:20,text:'我更喜欢通过书面形式而非口头表达自己的想法。',d:'ei',r:-1},{id:21,text:'我只有少数几个亲密的朋友，但这对我来说已足够。',d:'ei',r:-1},{id:22,text:'在讨论中，我更倾向于倾听而非发言。',d:'ei',r:-1},{id:23,text:'我更喜欢独立工作，这比团队合作更高效。',d:'ei',r:-1},{id:24,text:'陌生人向我搭话时，我会感到有些紧张。',d:'ei',r:-1},
+{id:25,text:'我更关注眼前看得见摸得着的事物。',d:'sn',r:1},{id:26,text:'我更喜欢按照既有的方法和经验做事。',d:'sn',r:1},{id:27,text:'我非常注重具体的事实和细节。',d:'sn',r:1},{id:28,text:'我认为只有亲身验证过的事情才值得相信。',d:'sn',r:1},{id:29,text:'阅读时，我更关注实际发生的情节而非隐喻内涵。',d:'sn',r:1},{id:30,text:'我更喜欢逐步推进的工作方式，而不是跳跃式思维。',d:'sn',r:1},{id:31,text:'我对理论知识兴趣不大，更关心实际应用。',d:'sn',r:1},{id:32,text:'我习惯于依赖过往的成功经验来解决问题。',d:'sn',r:1},{id:33,text:'别人说我做事踏实、脚踏实地。',d:'sn',r:1},{id:34,text:'我更擅长处理具体明确的任务，而非抽象概念。',d:'sn',r:1},{id:35,text:'我对饮食、天气等日常生活细节比较敏锐。',d:'sn',r:1},{id:36,text:'我经常沉浸在对未来可能性的遐想中。',d:'sn',r:-1},{id:37,text:'我很容易发现事物之间隐藏的关联和模式。',d:'sn',r:-1},{id:38,text:'我对抽象的理论和概念充满好奇。',d:'sn',r:-1},{id:39,text:'我更喜欢思考\"有可能是什么\"而不是\"现在是什么\"。',d:'sn',r:-1},{id:40,text:'在做事情时，我更注重大方向而非细枝末节。',d:'sn',r:-1},{id:41,text:'我的想象力很丰富，经常有新的创意。',d:'sn',r:-1},{id:42,text:'我容易被新颖的想法和创新的方案吸引。',d:'sn',r:-1},{id:43,text:'在做计划时，我更多依赖直觉而非详细的数据。',d:'sn',r:-1},{id:44,text:'我经常思考人生的深层意义和哲学问题。',d:'sn',r:-1},{id:45,text:'听故事时，我更关注其传达的主题和寓意。',d:'sn',r:-1},{id:46,text:'我讨厌一成不变的工作，渴望新鲜和变化。',d:'sn',r:-1},{id:47,text:'我经常会有天马行空的奇思妙想。',d:'sn',r:-1},
+{id:48,text:'做决定时，我主要依靠逻辑分析而非个人情感。',d:'tf',r:1},{id:49,text:'我认为公平比体谅他人更重要。',d:'tf',r:1},{id:50,text:'在与他人争论时，我更在意谁对谁错而非感受。',d:'tf',r:1},{id:51,text:'即使会伤害对方的感受，我也会说出真相。',d:'tf',r:1},{id:52,text:'我习惯先批评再表扬，因为改进比赞美更有价值。',d:'tf',r:1},{id:53,text:'面对问题时，我专注于寻找解决方案而非安慰情绪。',d:'tf',r:1},{id:54,text:'人们有时说我太理性、不够温情。',d:'tf',r:1},{id:55,text:'我能够相对客观地看待问题，不受情感干扰。',d:'tf',r:1},{id:56,text:'在看电影或新闻时，我不太容易流泪。',d:'tf',r:1},{id:57,text:'我认为坚持原则比维持和谐关系更重要。',d:'tf',r:1},{id:58,text:'我更欣赏一个人的能力而非其态度。',d:'tf',r:1},{id:59,text:'做决策时，我会优先考虑对他人的影响。',d:'tf',r:-1},{id:60,text:'我很容易感受到他人的情绪变化。',d:'tf',r:-1},{id:61,text:'维护人际关系的和谐对我来说非常重要。',d:'tf',r:-1},{id:62,text:'在指出别人错误时，我会格外注意措辞以免伤害对方。',d:'tf',r:-1},{id:63,text:'看到他人受苦时，我会感到非常难过。',d:'tf',r:-1},{id:64,text:'我觉得营造温馨的氛围比达成目标更重要。',d:'tf',r:-1},{id:65,text:'我常常将他人的需求置于自己之上。',d:'tf',r:-1},{id:66,text:'我做决定时很大程度上会受到价值观的驱动。',d:'tf',r:-1},{id:67,text:'我很容易被感人的故事或画面打动。',d:'tf',r:-1},{id:68,text:'比起客观真相，我更在意会不会伤害到别人。',d:'tf',r:-1},{id:69,text:'我经常被评价为善解人意、富有同理心。',d:'tf',r:-1},{id:70,text:'我倾向于先考虑人的感受，再考虑事情本身。',d:'tf',r:-1},
+{id:71,text:'我喜欢提前制定详细的计划并按计划执行。',d:'jp',r:1},{id:72,text:'任务完成后我喜欢立即把它从清单上划掉。',d:'jp',r:1},{id:73,text:'我的工作台和房间通常保持整洁有序。',d:'jp',r:1},{id:74,text:'我倾向于在截止日期之前早早完成任务。',d:'jp',r:1},{id:75,text:'我喜欢生活中有明确的规则和时间表。',d:'jp',r:1},{id:76,text:'我对不确定的事情感到焦虑。',d:'jp',r:1},{id:77,text:'我习惯做完一件事再开始下一件事。',d:'jp',r:1},{id:78,text:'我更喜欢早做决定而不是一直保持开放选择。',d:'jp',r:1},{id:79,text:'旅行前我会做详细的行程规划。',d:'jp',r:1},{id:80,text:'我会因为事情没有按计划进行而感到烦躁。',d:'jp',r:1},{id:81,text:'我习惯使用待办清单来管理日常事务。',d:'jp',r:1},{id:82,text:'我更喜欢随遇而安，而不是被计划束缚。',d:'jp',r:-1},{id:83,text:'我经常同时开展多个项目，但未必全部完成。',d:'jp',r:-1},{id:84,text:'我习惯在最后一刻才全力冲刺完成任务。',d:'jp',r:-1},{id:85,text:'我的生活空间经常处于\"有序的混乱\"状态。',d:'jp',r:-1},{id:86,text:'我讨厌被严格的时间表束缚。',d:'jp',r:-1},{id:87,text:'做决定后我经常会犹豫，觉得也许还有更好的选择。',d:'jp',r:-1},{id:88,text:'我喜欢尝试各种可能性，不想过早下定论。',d:'jp',r:-1},{id:89,text:'临时的邀约和计划变动让我感到兴奋。',d:'jp',r:-1},{id:90,text:'我更喜欢灵活的工作方式而非固定的流程。',d:'jp',r:-1},{id:91,text:'我在截止日期前反而效率最高。',d:'jp',r:-1},{id:92,text:'我喜欢发现和探索，即使这意味着偏离原计划。',d:'jp',r:-1},{id:93,text:'我经常在同一时间段内处理多件事情。',d:'jp',r:-1}
+];
+var personalityTypes={
+INTJ:{name:'建筑师型人格',nk:'策略家',desc:'INTJ 是独立思考者，拥有强大的逻辑分析能力和前瞻性思维。他们善于制定长期战略，追求效率和系统性，总是能看到改进的空间。',detail:'你是一个富有想象力和战略性的思考者，一切皆在计划之中。你是"系统的建造者"，总能清晰地看到如何让事物变得更好。你不满足于现状，总是在思考如何改进和优化。你重视知识和能力，追求深度而非广度。',p:['富有远见','独立思考','高度自信','求知欲强','果断坚定'],n:['不善社交','过于挑剔','情感表达困难','完美主义','缺乏耐心'],c:['科学家','工程师','战略顾问','软件架构师','投资分析师'],ce:['埃隆·马斯克','马克·扎克伯格','尼采','克里斯托弗·诺兰']},
+INTP:{name:'逻辑学家型人格',nk:'思考者',desc:'INTP 是理性的分析者，对知识和理论有着永不满足的渴望。他们喜欢探索抽象概念，寻找事物背后的逻辑规律。',detail:'你是一个充满好奇心的思考者，热爱理论和抽象概念。你享受探索复杂问题的过程，喜欢分析事物运作的原理。你拥有出色的逻辑分析能力，能够快速地发现系统中的矛盾和漏洞。',p:['逻辑清晰','思维开放','善于分析','客观公正','创造力强'],n:['社交困难','过于理论化','不切实际','优柔寡断','情感疏离'],c:['程序员','研究员','大学教授','数据分析师','游戏设计师'],ce:['爱因斯坦','比尔·盖茨','孔子','笛卡尔']},
+ENTJ:{name:'指挥官型人格',nk:'领导者',desc:'ENTJ 是天生的领导者，拥有强大的组织能力和执行力。他们目标明确，善于统筹全局。',detail:'你是一个果断、高效的领导者，生来就具有指挥和组织的天赋。你目光远大，总能清晰地看到前方的目标并制定最佳路径。你善于发现每个人的优势，并把合适的人放在合适的位置上。你做事效率极高，讨厌浪费时间。',p:['领导力强','战略思维','高效执行','善于演讲','果断决策'],n:['专横跋扈','缺乏耐心','情感冷漠','过于苛刻','不愿妥协'],c:['企业CEO','项目经理','管理顾问','律师','政治家'],ce:['史蒂夫·乔布斯','杰克·韦尔奇','撒切尔夫人','刘强东']},
+ENTP:{name:'辩论家型人格',nk:'创新者',desc:'ENTP 是充满活力的创新者，思维敏捷，口才出众。他们喜欢挑战传统观念，享受智力上的较量。',detail:'你是一个机智、灵活的思考者，享受智力挑战和思维碰撞。你拥有快速思考的能力，善于在辩论中找到对方的逻辑漏洞。你喜欢探索新的想法和可能性，对常规和惯例感到厌倦。',p:['思维敏捷','创造力强','口才出众','适应力强','乐观积极'],n:['好争论','缺乏纪律','容易分心','不够细致','三分钟热度'],c:['创业者','产品经理','律师','市场策划','记者'],ce:['托马斯·爱迪生','马克·吐温','萨莎·拜伦·科恩','达·芬奇']},
+INFJ:{name:'提倡者型人格',nk:'引路人',desc:'INFJ 是富有洞察力和使命感的理想主义者。他们拥有深刻的同理心和远见卓识。',detail:'你是一个拥有深刻洞察力和坚定信念的"引路人"。你能够敏锐地感知他人的情感和需求，同时又保持着对未来的清晰愿景。你追求意义和目的，渴望为世界做出独特的贡献。',p:['洞察力强','富有同理心','有使命感','创造力丰富','善于倾听'],n:['过于理想化','容易疲惫','过分追求完美','不善拒绝','过于敏感'],c:['心理咨询师','教育工作者','作家','人力资源','非营利组织管理'],ce:['马丁·路德·金','纳尔逊·曼德拉','J·K·罗琳','柏拉图']},
+INFP:{name:'调停者型人格',nk:'梦想家',desc:'INFP 是诗意和善良的梦想家，内心世界丰富而深邃。他们坚守自己的价值观，追求真实和意义。',detail:'你是一个内心丰富、充满理想的"梦想家"。你拥有深邃的内心世界和丰富的想象力，总是在寻找生活的深层意义。你对美和真实有着天然的感知力。你坚守自己的价值观。',p:['理想主义','创造力强','善解人意','真诚热情','适应力强'],n:['过于理想化','容易受伤','回避冲突','缺乏规划','自我怀疑'],c:['作家','艺术设计','心理咨询师','翻译','公益项目管理'],ce:['莎士比亚','梵高','托尔金','宫崎骏']},
+ENFJ:{name:'主人公型人格',nk:'引领者',desc:'ENFJ 是天生的鼓舞者，拥有出众的魅力和领导才能。他们善于理解他人。',detail:'你是一个充满魅力、富有感染力的"主人公"。你天生具有领导才能，能够自然地吸引和鼓舞身边的人。你善于发现他人的潜力，并乐于帮助他人成长和进步。你拥有出色的沟通能力。',p:['魅力四射','善于沟通','富有同理心','鼓舞人心','组织能力强'],n:['过度付出','过于在意他人看法','忽略自己','完美主义','容易负担过重'],c:['培训经理','教育工作者','人力资源总监','公共关系','企业培训师'],ce:['奥普拉·温弗瑞','马丁·路德·金','小威廉姆斯','奥巴马夫人']},
+ENFP:{name:'竞选者型人格',nk:'探索者',desc:'ENFP 是充满热情和创造力的社交精灵。他们拥有无限的想象力和好奇心。',detail:'你是一个充满活力、热情洋溢的"探索者"。你对世界充满好奇，总是在寻找新的可能性和体验。你拥有丰富的想象力和创造力，能够从平凡中发现不平凡。你善于与人建立联系。',p:['热情洋溢','创造力强','人际交往能力强','乐观向上','好奇心强'],n:['容易分心','组织能力弱','过于情绪化','拖延倾向','过于理想化'],c:['市场营销','创意总监','记者','心理咨询师','活动策划'],ce:['沃尔特·迪士尼','罗宾·威廉姆斯','马克·吐温','海绵宝宝']},
+ISTJ:{name:'物流师型人格',nk:'实干者',desc:'ISTJ 是可靠和负责任的实干家，做事认真严谨、一丝不苟。他们尊重传统和规则。',detail:'你是一个脚踏实地、认真负责的"实干者"。你可靠、稳定，是大家信賴的支柱。你做事有条不紊，注重细节，从不马虎了事。你尊重传统和规则，相信既有的经验和方法。你有极强的责任感和使命感。',p:['可靠负责','注重细节','条理清晰','务实高效','忠诚守信'],n:['固执己见','不善于变化','情感压抑','过于严肃','缺乏想象力'],c:['会计师','审计师','律师助理','银行职员','公务员','数据分析师'],ce:['乔治·华盛顿','维多利亚女王','埃莉诺·罗斯福','安德鲁·卡内基']},
+ISFJ:{name:'守卫者型人格',nk:'守护者',desc:'ISFJ 是温柔而坚定的守护者，默默付出、无私奉献。他们细心周到，善于照顾他人。',detail:'你是一个温柔体贴、默默奉献的"守护者"。你敏感细腻，能察觉到身边人的需求并默默提供帮助。你非常重视责任和承诺，总是尽全力完成自己的任务。你对传统和家庭有着深厚的感情。',p:['细心周到','无私奉献','责任心强','善于倾听','耐心细致'],n:['过度自我牺牲','害怕变化','过于谨慎','压抑情感','过于迎合他人'],c:['护士','教师','社会工作者','行政助理','图书管理员'],ce:['特蕾莎修女','碧昂丝','凯特·米德尔顿','奥黛丽·赫本']},
+ESTJ:{name:'总经理型人格',nk:'管理者',desc:'ESTJ 是天生的管理者，高效务实、果断有力。他们善于组织和管理，注重效率和秩序。',detail:'你是一个务实高效、果断有力的"管理者"。你天生擅长组织和领导，能够快速理清复杂的情况并做出决策。你重视效率、秩序和规则，认为这些是成功的基石。你做事直接了当。',p:['执行力强','组织能力出众','果断决策','务实高效','责任心强'],n:['过于强势','固执死板','缺乏同理心','不容置疑','忽视他人感受'],c:['企业经理','项目经理','军官','政府官员','运营总监'],ce:['亨利·福特','宋庆龄','贾伯斯','撒切尔夫人']},
+ESFJ:{name:'执政官型人格',nk:'关怀者',desc:'ESFJ 是温暖友善的社交达人，乐于助人、重视和谐。他们富有责任感。',detail:'你是一个温暖友善、乐于助人的"关怀者"。你极具社交天赋，总能自然地与他人建立良好的关系。你重视和谐与合作，善于营造温馨友善的氛围。你有着强烈的责任感。',p:['温暖友善','责任心强','善于合作','注重细节','忠诚可靠'],n:['过度在意他人看法','害怕冲突','过于保守','容易依赖','过度付出'],c:['人力资源','客户服务','护理','小学教师','活动策划','社区管理'],ce:['泰勒·斯威夫特','碧昂丝','比尔·克林顿','桑德拉·布洛克']},
+ISTP:{name:'鉴赏家型人格',nk:'手艺人',desc:'ISTP 是冷静灵活的手艺人，善于动手操作、解决实际问题。他们独立自主。',detail:'你是一个冷静灵活、善于动手的"手艺人"。你拥有出色的动手能力和空间感知力，能够轻松理解机械和工具的运作原理。你独立自主，不需要太多外在的认可，更看重自己的能力和自由。',p:['冷静沉着','动手能力强','灵活应变','善于观察','独立自主'],n:['不善社交','缺乏长远规划','过于特立独行','容易厌倦','情感疏离'],c:['工程师','飞行员','外科医生','赛车手','建筑设计师','消防员'],ce:['史蒂夫·乔布斯','克林特·伊斯特伍德','汤姆·克鲁斯','李小龙']},
+ISFP:{name:'探险家型人格',nk:'艺术家',desc:'ISFP 是自由奔放的艺术灵魂，热爱美和自然，追求内心的真实感受。',detail:'你是一个自由奔放、充满艺术气质的"探险家"。你对美有着天生的感知力，无论是自然风光、音乐还是视觉艺术都能触动你的心灵。你活在当下，享受生活中的每一个美好时刻。',p:['艺术天赋','感知力敏锐','温柔友善','灵活适应','享受当下'],n:['过于敏感','缺乏长远规划','回避冲突','过于内敛','决策困难'],c:['艺术设计师','摄影师','音乐人','插画家','园林景观设计师'],ce:['迈克尔·杰克逊','迈克尔·乔丹','莫奈','大卫·鲍伊']},
+ESTP:{name:'企业家型人格',nk:'行动派',desc:'ESTP 是精力充沛的行动派，思维敏捷、善于交际。他们享受冒险和挑战。',detail:'你是一个精力充沛、果敢直行的"行动派"。你拥有敏锐的洞察力，能够迅速判断形势并抓住机会。你思维敏捷，反应迅速，总能随机应变。你善于交际，充满魅力。',p:['行动力强','善于交际','随机应变','谈判高手','精力充沛'],n:['缺乏耐心','冒险冲动','不够细致','不善于长期规划','挑战规则'],c:['企业家','销售总监','房地产经纪人','体育运动员','投资经理'],ce:['唐纳德·特朗普','麦当娜','海明威','阿诺德·施瓦辛格']},
+ESFP:{name:'表演者型人格',nk:'欢乐使者',desc:'ESFP 是聚光灯下的明星，热情开朗、活力四射。他们享受生活，善于娱乐他人。',detail:'你是一个热情开朗、活力四射的"欢乐使者"。你天生就是众人的焦点，拥有感染他人的魅力。你喜欢成为注意力的中心，享受表演和展示自我的时刻。你对生活充满热情。',p:['乐观开朗','魅力十足','善于交际','慷慨大方','适应力强'],n:['容易冲动','缺乏规划','注意力分散','过于追求关注','回避负面情绪'],c:['演员','主持人','导游','培训师','活动策划','销售人员'],ce:['玛丽莲·梦露','猫王','威尔·史密斯','金·卡戴珊']}
+};
+var state={cp:'home',cq:0,ans:[],total:questions.length};
+function init(){state.ans=new Array(state.total).fill(-1);state.cq=0}
+function show(p){document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active')});var el=document.getElementById(p+'Page');if(el){el.classList.add('active')}window.scrollTo(0,0)}
+function startTest(){init();show('test');renderQ();updateP()}
+function renderQ(){
+  var q=questions[state.cq],labels=['非常不同意','不同意','中立','同意','非常同意'],html='<div class="question-card"><div class="question-number">第 '+(state.cq+1)+' / '+state.total+' 题</div><div class="question-text">'+q.text+'</div><div class="options">';
+  for(var i=0;i<5;i++){var sel=state.ans[state.cq]===i?' selected':'';html+='<div class="option-item'+sel+'" onclick="sel(this,'+i+')">'+labels[i]+'</div>'}
+  html+='</div></div>';document.getElementById('questionContainer').innerHTML=html;
+}
+function sel(el,s){
+  document.querySelectorAll('.option-item').forEach(function(x){x.classList.remove('selected')});el.classList.add('selected');
+  state.ans[state.cq]=s;
+  setTimeout(function(){
+    if(state.cq<state.total-1){state.cq++;renderQ();updateP()}else calcR();
+  },300);
+}
+function updateP(){
+  var a=state.ans.filter(function(x){return x!==-1}).length;
+  document.getElementById('progressBar').style.width=(a/state.total*100)+'%';
+  document.getElementById('progressText').textContent=a+' / '+state.total;
+}
+function prevQuestion(){
+  if(state.cq>0){state.cq--;renderQ();updateP()}else show('home');
+}
+function calcR(){
+  try{
+    if(state.ans.some(function(a){return a===-1}))return;
+    updateP();
+    var es=0,ss=0,ts=0,js=0,ec=0,sc=0,tc=0,jc=0;
+    for(var i=0;i<questions.length;i++){var q=questions[i],sc2=state.ans[i];if(sc2===-1)sc2=2;var ad=q.r===1?sc2:(4-sc2);
+      if(q.d==='ei'){es+=ad;ec++}else if(q.d==='sn'){ss+=ad;sc++}else if(q.d==='tf'){ts+=ad;tc++}else if(q.d==='jp'){js+=ad;jc++}}
+    var ea=es/ec,sa=ss/sc,ta=ts/tc,ja=js/jc;
+    var code=(ea>=2?'E':'I')+(sa>=2?'S':'N')+(ta>=2?'T':'F')+(ja>=2?'J':'P'),data=personalityTypes[code];
+    if(!data){show('result');document.getElementById('resultType').textContent='??';document.getElementById('resultName').textContent='无法识别，请重试';return}
+    showR(code,data,{ei:ea,sn:sa,tf:ta,jp:ja});
+  }catch(e){show('result');document.getElementById('resultType').textContent='!?';document.getElementById('resultName').textContent='计算出错，请重试'}
+}
+function showR(code,data,s){
+  show('result');
+  document.getElementById('resultType').textContent=code;
+  document.getElementById('resultName').textContent=data.name;
+  document.getElementById('resultNickname').textContent='「'+data.nk+'」';
+  document.getElementById('resultSummary').textContent=data.desc;
+  document.getElementById('resultDetail').textContent=data.detail;
+  var dims=[{l:'I 内向',r:'E 外向',v:s.ei},{l:'N 直觉',r:'S 实感',v:s.sn},{l:'F 情感',r:'T 理性',v:s.tf},{l:'P 感知',r:'J 判断',v:s.jp}],html='';
+  for(var i=0;i<dims.length;i++){var d=dims[i];html+='<div class="dimension-item"><div class="dim-label"><span class="left">'+d.l+'</span><span class="score">'+d.v.toFixed(1)+'</span><span class="right">'+d.r+'</span></div><div class="dim-bar"><div class="dim-bar-fill" style="width:'+(d.v/4*100)+'%"></div></div><div class="dim-indicator"><span>0</span><span>2</span><span>4</span></div></div>'}
+  document.getElementById('dimensionBars').innerHTML=html;
+  document.getElementById('strengths').innerHTML=data.p.map(function(s){return '<span class="trait-tag positive">'+s+'</span>'}).join('');
+  document.getElementById('weaknesses').innerHTML=data.n.map(function(w){return '<span class="trait-tag negative">'+w+'</span>'}).join('');
+  document.getElementById('careerTags').innerHTML=data.c.map(function(c){return '<span class="career-tag">'+c+'</span>'}).join('');
+  document.getElementById('celebList').innerHTML=data.ce.map(function(c){return '<span class="celeb-item">'+c+'</span>'}).join('');
+}
+function restartTest(){init();show('home')}
+function shareResult(){
+  var t=document.getElementById('resultType').textContent,n=document.getElementById('resultName').textContent;
+  var text='我测出的 MBTI 人格类型是：'+t+'「'+n+'」！快来测测你的性格类型吧 🎯';
+  if(navigator.share){navigator.share({title:'MBTI 人格测试',text:text,url:window.location.href}).catch(function(){})}else cp(text);
+}
+function cp(text){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){toast('结果已复制，快去分享给朋友吧！')}).catch(function(){cp2(text)})}else cp2(text);
+}
+function cp2(text){
+  var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');toast('结果已复制，快去分享给朋友吧！')}catch(e){toast('复制失败，请手动复制')}
+  document.body.removeChild(ta);
+}
+function toast(msg){
+  var t=document.getElementById('toast');if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('show');clearTimeout(t._timer);t._timer=setTimeout(function(){t.classList.remove('show')},2500);
+}
+</script>
+</body>
+</html>
